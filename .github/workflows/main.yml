@@ -120,10 +120,7 @@ jobs:
       run:  mkdir build
     - name: configure
       working-directory: build
-      run:  "../source/configure -opensource -confirm-license -ccache -no-pch -release -submodules qtdeclarative
-        -nomake tests -nomake examples
-        -prefix '${{ runner.temp }}'/install_dir
-        ${{ matrix.configure_flags }}"
+      run:  "../source/configure -opensource -confirm-license -ccache -no-pch -release -submodules qtdeclarative -init-submodule -nomake tests -nomake example -prefix '${{ runner.temp }}'/install_dir ${{ matrix.configure_flags }}"
     - name: ninja
       working-directory: build
       run: ninja
