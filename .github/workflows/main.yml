@@ -141,3 +141,22 @@ jobs:
         cat build/CMakeFiles/CMakeError.log
         echo ==== CMakeCache.txt ====
         cat build/CMakeCache.txt
+
+    - name: Upload qtbase/bin/qmlls
+      uses: actions/upload-artifact@v4
+      with:
+        path: ./build/qtbase/bin/qmlls
+        name: qmlls-${{ matrix.config.artifact }}-${{ steps.git.outputs.tag }}
+
+
+    # TODO: might be used to build all of Qt
+    # - name: Pack qtbase build directory
+    #   working-directory: build/qtbase/
+    #   run: cmake -E tar cfv ../../${{ matrix.config.artifact }}-${{ steps.git.outputs.tag }}.7z --format=7zip .
+
+    # - name: Upload qtbase build directory
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     path: ./${{ matrix.config.artifact }}-${{ steps.git.outputs.tag }}.7z
+    #     name: ${{ matrix.config.artifact }}-${{ steps.git.outputs.tag }}.7z
+
