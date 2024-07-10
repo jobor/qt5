@@ -106,11 +106,69 @@ jobs:
         echo Environment:
         printenv
 
+    - name: initialize subrepositories
+      working-directory: source
+      run:  perl init-repository --module-subset=qtdeclarative
+
+    - name: grab qtbase hash from qtdeclarative/dependencies.yaml
+      id: qtbaseHash
+      uses: mikefarah/yq@master
+      with:
+        cmd: yq eval '.dependencies.["../qtbase"].ref' dependencies.yaml
+
+    - name: grab qtimageformats hash from qtdeclarative/dependencies.yaml
+      id: qtimageformatsHash
+      uses: mikefarah/yq@master
+      with:
+        cmd: yq eval '.dependencies.["../qtimageformats"].ref' dependencies.yaml
+
+    - name: grab qtlanguageserver hash from qtdeclarative/dependencies.yaml
+      id: qtlanguageserverHash
+      uses: mikefarah/yq@master
+      with:
+        cmd: yq eval '.dependencies.["../qtlanguageserver"].ref' dependencies.yaml
+
+    - name: grab qtshadertools hash from qtdeclarative/dependencies.yaml
+      id: qtshadertoolsHash
+      uses: mikefarah/yq@master
+      with:
+        cmd: yq eval '.dependencies.["../qtshadertools"].ref' dependencies.yaml
+
+    - name: grab qtsvg hash from qtdeclarative/dependencies.yaml
+      id: qtsvgHash
+      uses: mikefarah/yq@master
+      with:
+        cmd: yq eval '.dependencies.["../qtsvg"].ref' dependencies.yaml
+
+    - name: checkout latest qtdeclarative
+      working-directory: source/qtdeclarative
+      run:  git checkout dev
+
+    - name: checkout qtbase
+      working-directory: source/qtbase
+      run:  git checkout $({ steps.qtbaseHash.outputs.result })
+
+    - name: checkout qtimageformats
+      working-directory: source/qtimageformats
+      run:  git checkout $({ steps.qtimageformatsHash.outputs.result })
+
+    - name: checkout qtlanguageserver
+      working-directory: source/qtlanguageserver
+      run:  git checkout $({ steps.qtlanguageserverHash.outputs.result })
+
+    - name: checkout qtshadertools
+      working-directory: source/qtshadertools
+      run:  git checkout $({ steps.qtshadertoolsHash.outputs.result })
+
+    - name: checkout qtsvg
+      working-directory: source/qtsvg
+      run:  git checkout $({ steps.qtsvgHash.outputs.result })
+
     - name: make build directory
       run:  mkdir build
     - name: configure
       working-directory: build
-      run:  "../source/configure -opensource -confirm-license -ccache -no-pch -release -static -submodules qtdeclarative -init-submodules -nomake tests -nomake examples -prefix '${{ runner.temp }}'/install_dir ${{ matrix.configure_flags }}"
+      run:  "../source/configure -opensource -confirm-license -ccache -no-pch -release -static -submodules qtdeclarative -nomake tests -nomake examples -prefix '${{ runner.temp }}'/install_dir ${{ matrix.configure_flags }}"
     - name: ninja
       working-directory: build
       run: ninja qmlls
@@ -133,7 +191,15 @@ jobs:
         echo ==== CMakeCache.txt ====
         cat build/CMakeCache.txt
 
+    - name: Upload qtbase/bin/qmlls.exe
+      if: runner.os == 'Windows'
+      uses: actions/upload-artifact@v4
+      with:
+        path: ./build/qtbase/bin/qmlls.exe
+        name: qmlls.exe
+
     - name: Upload qtbase/bin/qmlls
+      if: runner.os != 'Windows'
       uses: actions/upload-artifact@v4
       with:
         path: ./build/qtbase/bin/qmlls
