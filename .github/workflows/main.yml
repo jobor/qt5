@@ -21,13 +21,14 @@ jobs:
             os:   ubuntu-20.04
             # NOTE: system libmd4c is not detected
             deps:  libgl-dev libglu-dev 'libxcb*-dev' libx11-xcb-dev libxkbcommon-x11-dev libpcre2-dev libz-dev libfreetype6-dev libpng-dev libjpeg-dev libsqlite3-dev libharfbuzz-dev libb2-dev libdouble-conversion-dev libmd4c-dev
+            # NOTE: yq is preisntalled on that image
             tools: ninja-build ccache
             install_cmd: sudo apt-get -y install
             configure_flags: -xcb -system-sqlite -system-pcre -system-zlib -system-freetype -system-libpng -system-libjpeg -system-harfbuzz -system-libb2 -system-doubleconversion -system-libmd4c
           - name: macos-10.15
             os:   macos-10.15
             deps:  jpeg sqlite libpng pcre2 harfbuzz freetype libb2 double-conversion
-            tools: ninja ccache pkg-config
+            tools: ninja ccache pkg-config yq
             install_cmd: HOMEBREW_NO_INSTALL_CLEANUP=1 brew install
             # Specifically on macOS pkg_config has to be manually turned on otherwise libraries under /usr/local are not detected.
             configure_flags: -pkg-config -system-sqlite -system-pcre -system-zlib -system-freetype -system-libpng -system-libjpeg -system-harfbuzz -system-libb2 -system-doubleconversion
@@ -38,7 +39,7 @@ jobs:
             # Chocolatey sqlite package does not come with headers, so we build with bundled sqlite.
             #deps: sqlite
             # ccache installed separately later in order to force version
-            tools: ninja
+            tools: ninja yq
             # We don't want the system headers / libraries from Strawberry Perl while compiling with MinGW 8.1.0
             configure_flags: -qt-sqlite -qt-pcre -qt-zlib -qt-freetype -qt-libpng -qt-libjpeg -qt-harfbuzz -no-feature-sql-psql -no-feature-sql-mysql -no-feature-sql-odbc
     runs-on: ${{ matrix.os }}
@@ -110,59 +111,22 @@ jobs:
       working-directory: source
       run:  perl init-repository --module-subset=qtdeclarative
 
-    - name: grab qtbase hash from qtdeclarative/dependencies.yaml
-      id: qtbaseHash
-      uses: mikefarah/yq@master
-      with:
-        cmd: yq eval '.dependencies.["../qtbase"].ref' dependencies.yaml
-
-    - name: grab qtimageformats hash from qtdeclarative/dependencies.yaml
-      id: qtimageformatsHash
-      uses: mikefarah/yq@master
-      with:
-        cmd: yq eval '.dependencies.["../qtimageformats"].ref' dependencies.yaml
-
-    - name: grab qtlanguageserver hash from qtdeclarative/dependencies.yaml
-      id: qtlanguageserverHash
-      uses: mikefarah/yq@master
-      with:
-        cmd: yq eval '.dependencies.["../qtlanguageserver"].ref' dependencies.yaml
-
-    - name: grab qtshadertools hash from qtdeclarative/dependencies.yaml
-      id: qtshadertoolsHash
-      uses: mikefarah/yq@master
-      with:
-        cmd: yq eval '.dependencies.["../qtshadertools"].ref' dependencies.yaml
-
-    - name: grab qtsvg hash from qtdeclarative/dependencies.yaml
-      id: qtsvgHash
-      uses: mikefarah/yq@master
-      with:
-        cmd: yq eval '.dependencies.["../qtsvg"].ref' dependencies.yaml
-
-    - name: checkout latest qtdeclarative
+    - name: set qtdeclarative to dev and set dependencies via dependencies.yaml
       working-directory: source/qtdeclarative
-      run:  git checkout dev
-
-    - name: checkout qtbase
-      working-directory: source/qtbase
-      run:  git checkout $({ steps.qtbaseHash.outputs.result })
-
-    - name: checkout qtimageformats
-      working-directory: source/qtimageformats
-      run:  git checkout $({ steps.qtimageformatsHash.outputs.result })
-
-    - name: checkout qtlanguageserver
-      working-directory: source/qtlanguageserver
-      run:  git checkout $({ steps.qtlanguageserverHash.outputs.result })
-
-    - name: checkout qtshadertools
-      working-directory: source/qtshadertools
-      run:  git checkout $({ steps.qtshadertoolsHash.outputs.result })
-
-    - name: checkout qtsvg
-      working-directory: source/qtsvg
-      run:  git checkout $({ steps.qtsvgHash.outputs.result })
+      run: |
+      git checkout dev
+      function _qtXXXUp {
+          hash=$(yq eval '.dependencies.["../'${1}'"].ref' dependencies.yaml)
+          (cd ../$1 &&
+          git stash &&
+          git fetch &&
+          git checkout $hash)
+      }
+      _qtXXXUp qtbase
+      _qtXXXUp qtimageformats
+      _qtXXXUp qtlanguageserver
+      _qtXXXUp qtshadertools
+      _qtXXXUp qtsvg
 
     - name: make build directory
       run:  mkdir build
