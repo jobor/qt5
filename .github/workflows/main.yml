@@ -156,14 +156,14 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         path: ./build/qtbase/bin/qmlls.exe
-        name: qmlls-$({ matrix.os }).exe
+        name: qmlls-${{ matrix.os }}.exe
 
     - name: Upload qtbase/bin/qmlls
       if: runner.os != 'Windows'
       uses: actions/upload-artifact@v4
       with:
         path: ./build/qtbase/bin/qmlls
-        name: qmlls-$({ matrix.os })
+        name: qmlls-${{ matrix.os }}
 
 
     # TODO: might be used to build all of Qt
