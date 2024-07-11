@@ -19,7 +19,7 @@ jobs:
         include:
           - name: ubuntu-20.04
             os:   ubuntu-20.04
-            # NOTE: system libmd4c is not detected on ubuntu-latest
+            # NOTE: system libmd4c is not detected on ubuntu-latestt 
             deps:  libgl-dev libglu-dev 'libxcb*-dev' libx11-xcb-dev libxkbcommon-x11-dev libpcre2-dev libz-dev libfreetype6-dev libpng-dev libjpeg-dev libsqlite3-dev libharfbuzz-dev libb2-dev libdouble-conversion-dev libmd4c-dev
             # NOTE: yq is preinstalled on that image
             tools: ninja-build ccache
@@ -32,7 +32,7 @@ jobs:
             install_cmd: HOMEBREW_NO_INSTALL_CLEANUP=1 brew install
             # Specifically on macOS pkg_config has to be manually turned on otherwise libraries under /usr/local are not detected.
             configure_flags: -pkg-config -system-sqlite -system-pcre -system-zlib -system-freetype -system-libpng -system-libjpeg -system-harfbuzz -system-libb2 -system-doubleconversion
-          - name: windows-latest
+          - name: windows-latest/
             os:   windows-latest
             install_cmd: choco install
             install_cmd_postfix: --yes --no-progress
@@ -55,7 +55,7 @@ jobs:
     - name: prepare Windows
       if: runner.os == 'Windows'
       run: |
-        call "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+        "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
         env >> "$GITHUB_ENV"
 
 
