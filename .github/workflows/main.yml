@@ -114,19 +114,19 @@ jobs:
     - name: set qtdeclarative to dev and set dependencies via dependencies.yaml
       working-directory: source/qtdeclarative
       run: |
-      git checkout dev
-      function _qtXXXUp {
-          hash=$(yq eval '.dependencies.["../'${1}'"].ref' dependencies.yaml)
-          (cd ../$1 &&
-          git stash &&
-          git fetch &&
-          git checkout $hash)
-      }
-      _qtXXXUp qtbase
-      _qtXXXUp qtimageformats
-      _qtXXXUp qtlanguageserver
-      _qtXXXUp qtshadertools
-      _qtXXXUp qtsvg
+        git checkout dev
+        function _qtXXXUp {
+            hash=$(yq eval '.dependencies.["../'${1}'"].ref' dependencies.yaml)
+            (cd ../$1 &&
+            git stash &&
+            git fetch &&
+            git checkout $hash)
+        }
+        _qtXXXUp qtbase
+        _qtXXXUp qtimageformats
+        _qtXXXUp qtlanguageserver
+        _qtXXXUp qtshadertools
+        _qtXXXUp qtsvg
 
     - name: make build directory
       run:  mkdir build
