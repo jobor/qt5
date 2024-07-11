@@ -17,11 +17,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: ubuntu-latest
-            os:   ubuntu-latest
-            # NOTE: system libmd4c is not detected
+          - name: ubuntu-20.04
+            os:   ubuntu-20.04
+            # NOTE: system libmd4c is not detected on ubuntu-latest
             deps:  libgl-dev libglu-dev 'libxcb*-dev' libx11-xcb-dev libxkbcommon-x11-dev libpcre2-dev libz-dev libfreetype6-dev libpng-dev libjpeg-dev libsqlite3-dev libharfbuzz-dev libb2-dev libdouble-conversion-dev libmd4c-dev
-            # NOTE: yq is preisntalled on that image
+            # NOTE: yq is preinstalled on that image
             tools: ninja-build ccache
             install_cmd: sudo apt-get -y install
             configure_flags: -xcb -system-sqlite -system-pcre -system-zlib -system-freetype -system-libpng -system-libjpeg -system-harfbuzz -system-libb2 -system-doubleconversion -system-libmd4c
@@ -36,11 +36,7 @@ jobs:
             os:   windows-latest
             install_cmd: choco install
             install_cmd_postfix: --yes --no-progress
-            # Chocolatey sqlite package does not come with headers, so we build with bundled sqlite.
-            #deps: sqlite
-            # ccache installed separately later in order to force version
-            tools: ninja yq
-            # We don't want the system headers / libraries from Strawberry Perl while compiling with MinGW 8.1.0
+            tools: ninja ccache yq
             configure_flags: -qt-sqlite -qt-pcre -qt-zlib -qt-freetype -qt-libpng -qt-libjpeg -qt-harfbuzz -no-feature-sql-psql -no-feature-sql-mysql -no-feature-sql-odbc
     runs-on: ${{ matrix.os }}
 
@@ -58,11 +54,10 @@ jobs:
       run: echo noop
     - name: prepare Windows
       if: runner.os == 'Windows'
-      # Header pthread.h from postgres is included and creates issues.
-      # Also library zlib.lib is linked instead of the system one.
       run: |
-        rm -rf "C:/Program Files/PostgreSQL/"
-        choco install ccache --version 3.7.12 --yes --no-progress --not-silent --verbose --debug
+        call "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+        env >> "$GITHUB_ENV"
+
 
     - uses: actions/checkout@v4
       with:
