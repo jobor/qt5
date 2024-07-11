@@ -17,23 +17,23 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: ubuntu-20.04
-            os:   ubuntu-20.04
+          - name: ubuntu-latest
+            os:   ubuntu-latest
             # NOTE: system libmd4c is not detected
             deps:  libgl-dev libglu-dev 'libxcb*-dev' libx11-xcb-dev libxkbcommon-x11-dev libpcre2-dev libz-dev libfreetype6-dev libpng-dev libjpeg-dev libsqlite3-dev libharfbuzz-dev libb2-dev libdouble-conversion-dev libmd4c-dev
             # NOTE: yq is preisntalled on that image
             tools: ninja-build ccache
             install_cmd: sudo apt-get -y install
             configure_flags: -xcb -system-sqlite -system-pcre -system-zlib -system-freetype -system-libpng -system-libjpeg -system-harfbuzz -system-libb2 -system-doubleconversion -system-libmd4c
-          - name: macos-10.15
-            os:   macos-10.15
+          - name: macos-latest
+            os:   macos-latest
             deps:  jpeg sqlite libpng pcre2 harfbuzz freetype libb2 double-conversion
             tools: ninja ccache pkg-config yq
             install_cmd: HOMEBREW_NO_INSTALL_CLEANUP=1 brew install
             # Specifically on macOS pkg_config has to be manually turned on otherwise libraries under /usr/local are not detected.
             configure_flags: -pkg-config -system-sqlite -system-pcre -system-zlib -system-freetype -system-libpng -system-libjpeg -system-harfbuzz -system-libb2 -system-doubleconversion
-          - name: windows-2019
-            os:   windows-2019
+          - name: windows-latest
+            os:   windows-latest
             install_cmd: choco install
             install_cmd_postfix: --yes --no-progress
             # Chocolatey sqlite package does not come with headers, so we build with bundled sqlite.
