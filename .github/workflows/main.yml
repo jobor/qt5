@@ -107,7 +107,7 @@ jobs:
 
     - name: initialize subrepositories
       working-directory: source
-      run:  ./init-repository --module-subset=qtdeclarative,qtshadertools,qtlanguageserver --no-optional-deps
+      run:  ./init-repository --module-subset=qtdeclarative,qtshadertools,qtlanguageserver --no-optional-deps --mirror="https://code.qt.io/qt/"
 
     - name: set qtdeclarative to dev and set dependencies via dependencies.yaml
       working-directory: source/qtdeclarative
